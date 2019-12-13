@@ -1,0 +1,15 @@
+/* Stock information (center of page) */
+
+.stock_info table {
+  background-color: transparent;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.stock_info table td {
+  padding: 5px;
+}
+
+.caption {
+  margin: 15px auto;
+}

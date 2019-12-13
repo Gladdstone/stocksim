@@ -1,0 +1,4 @@
+**/__pycache__/*
+src/.python-version
+src/./config/.env
+src/.env

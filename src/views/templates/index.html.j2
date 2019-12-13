@@ -1,0 +1,20 @@
+{% extends "layout.html.j2" %}
+
+{% block title %}Home{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/home.css') }}">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/table.css') }}">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/container-macro.css') }}">
+{% endblock %}
+
+
+
+{% block content %}
+<div class="outer-container">
+  {% include "stocks/owned-assets-list.html.j2" %}
+  {% include "watchlist/watchlist-cards.html.j2" %}
+</div>
+
+{% endblock %}

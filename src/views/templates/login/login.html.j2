@@ -1,0 +1,38 @@
+{% extends "layout.html.j2" %}
+
+{% block title %}Login{% endblock %}
+
+{% block head %}
+  {{ super() }}
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/form.css') }}">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/login.css') }}">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
+{% endblock %}
+
+{% block content %}
+
+  <form method="post" action="{{ url_for('login')}}">
+    <div class="form-container">
+      <h2>Login</h2>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+       <label for="username"><b>Username</b></label>
+       <input type="text" placeholder="Enter Username" name="username" required>
+
+       <label for="password"><b>Password</b></label>
+       <input type="password" placeholder="Enter Password" name="password" required>
+
+       <button type="submit" class="btn btn--full-width">Login</button>
+       <!-- <div class="pwd">Forgot <a href="/reset-password">password</a>?</div> -->
+    </div>
+
+    <div class="form-container form-container-alt">
+      <button type="button" class="btn--outline cancelbtn">Cancel</button>
+      <div class="pwd">Don't have an account? <a href="/register">Register here</a>.</div>
+    </div>
+  </form>
+
+{% endblock %}
