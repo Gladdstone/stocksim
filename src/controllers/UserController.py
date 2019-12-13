@@ -1,20 +1,19 @@
 # dependencies
-import mysql.connector, binascii, hashlib, os
+import binascii, hashlib, os
+import psycopg2 as psycopg
 
 # LOCAL
 from models import User
-from settings import MYSQL_USER, MYSQL_PASSWORD
+from settings import HOST, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
-
-    # CONN_STRING = "host='localhost' port=3306 user='root' password=''"
 
     @staticmethod
     def findByUsername(username: str): # -> User:
         connection = None
         user = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
 
             cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';")
@@ -27,7 +26,7 @@ class UserController:
 
             cursor.close()
 
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return None
         finally:
@@ -40,7 +39,7 @@ class UserController:
     def addBalance(user_id: int, amount: float):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
 
@@ -56,7 +55,7 @@ class UserController:
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return {"message": "Something went wrong"}
         finally:
@@ -69,8 +68,7 @@ class UserController:
     def subtractBalance(user_id: int, amount: float):
         connection = None
         try:
-            # connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
-            connection = mysql.connector.connect(host="localhost", user="root", password="", database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
             cursor.execute(f"SELECT balance FROM UserTable WHERE id={user_id};")
@@ -86,7 +84,7 @@ class UserController:
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             return {"message": "Something went wrong"}
         finally:
             if(connection is not None):
@@ -97,8 +95,7 @@ class UserController:
     def getUserBalanceHistory(user_id):
         connection = None
         try:
-            # connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
-            connection = mysql.connector.connect(host="localhost", user="root", password="", database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
 
@@ -106,7 +103,7 @@ class UserController:
             history = cursor.fetchall()
 
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             return {"message": "Something went wrong"}
         finally:
             if(connection is not None):
@@ -119,7 +116,7 @@ class UserController:
     def registration(username: str, password: str): #, email: str):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             if connection.is_connected():
                 cursor = connection.cursor()
@@ -145,7 +142,7 @@ class UserController:
 
                 connection.commit()
                 cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return {"message": "Unable to create new user"}   # TODO
         finally:
@@ -158,7 +155,7 @@ class UserController:
     def archive(user_id: int):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
 
@@ -174,13 +171,13 @@ class UserController:
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return {"Error": "Unable to archive user"}  #TODO
         finally:
             if(connection is not None):
                 connection.close()
-                return {"message": "User successfully archived"}    # TODO
+            return {"message": "User successfully archived"}    # TODO
 
     # secure password with sha512
     def __hash(self, password: str):
@@ -193,7 +190,7 @@ class UserController:
     def login(username: str, password: str):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             if connection.is_connected():
                 cursor = connection.cursor()
@@ -210,13 +207,14 @@ class UserController:
                 dbPassword = row[0]
                 salt = row[1]
 
+                cursor.close()
                 if(password == salt + dbPassword):
                     user = User.User(row[0], username)
                     user.authenticate()
                     return True
 
             return False
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return False
 
@@ -225,7 +223,7 @@ class UserController:
     def validate_login(user: User, user_id: str, password: str):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             if connection.is_connected():
                 cursor = connection.cursor()
 
@@ -244,7 +242,7 @@ class UserController:
                     return True
 
             return False
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return False
 
@@ -253,7 +251,7 @@ class UserController:
     def logout(user: User, tokenId: str):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
 
@@ -269,7 +267,7 @@ class UserController:
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return False
         finally:
@@ -281,7 +279,7 @@ class UserController:
     def tokenIsBlacklisted(jti: str):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             cursor = connection.cursor()
 
@@ -294,7 +292,7 @@ class UserController:
                 return True
 
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)
             return True
         finally:
