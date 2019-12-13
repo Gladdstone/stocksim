@@ -1,15 +1,14 @@
 # dependencies
-import mysql.connector, os
+import os
+import psycopg2 as psycopg
 
 # LOCAL
 from Resources import MarketProvider
 from models.assets import Stock, Asset
 from models.User import User
-from settings import MYSQL_USER, MYSQL_PASSWORD
+from settings import HOST, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class StockController:
-
-    # CONN_STRING = "host='localhost' port=3306 user='root' password=''"
 
     # Inserts a Stock object into the Stock table and returns the generated ID
     # on success, -1 on failure
@@ -18,7 +17,7 @@ class StockController:
         connection = None
         stockId = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORDWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
 
             # if symbol exists in Stock table, update pricing from API
@@ -43,7 +42,7 @@ class StockController:
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error)    # TODO
             return -1
         finally:
@@ -57,14 +56,14 @@ class StockController:
         stockId = cls.insertStock(stock)
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
 
             cursor.execute(f"INSERT INTO WatchList(stock_id, user_id) VALUES({stockId}, {user_id});")
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error) # TODO - log error
             return {"message": "Something went wrong"}
         finally:
@@ -77,14 +76,14 @@ class StockController:
     def removeWatch(stockId: int, user_id: int):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
 
             cursor.execute(f"DELETE FROM WatchList WHERE stock_id={stockId};")
 
             connection.commit()
             cursor.close()
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error) # TODO - log error
         finally:
             if(connection is not None):
@@ -125,12 +124,12 @@ class StockController:
     def purchaseAsset(stock: Stock, user: User):
         connection = None
         try:
-            connection = mysql.connector.connect(host="localhost", user=MYSQL_USER, password=MYSQL_PASSWORD, database="stocksimulator")
+            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
             # there's a lot to do here
             # we need to get the purchase price
             cursor.execute(f"INSERT INTO Stock VALUES({stock.open}, {stock.close}, {stock.high}, {stock.low}, {stock.average_volume}, {stock.dividend_yield}, {stock.type}, {stock.last}, '{stock.symbol}', {stock.prevclose});")
-        except mysql.connector.Error as error:
+        except psycopg.DatabaseError as error:
             print(error) # TODO - log error
         finally:
             if(connection is not None):
