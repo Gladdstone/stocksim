@@ -1,0 +1,34 @@
+{
+  "name": "view_v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode-development",
+    "build": "webpack --mode production",
+    "eslint-fix": "eslint --fix \"src/**/*.js\"",
+    "webpack": "webpack"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "path": "^0.12.7",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/preset-react": "^7.7.4",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "eslint": "^6.7.2",
+    "eslint-config-react": "^1.1.7",
+    "eslint-loader": "^3.0.3",
+    "eslint-plugin-react": "^7.17.0"
+  }
+}
