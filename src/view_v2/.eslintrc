@@ -7,6 +7,8 @@
     },
     "rules": {
         "jsx-quotes": ["warn", "prefer-single"],
+        "padded-blocks": ["warn", "always"],
+        "space-before-function-paren": ["warn", "never"],
         "quotes": ["warn", "single"]
     }, 
     "settings": {

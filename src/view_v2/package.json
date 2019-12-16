@@ -6,8 +6,8 @@
   "scripts": {
     "start": "webpack-dev-server --mode-development",
     "build": "webpack --mode production",
-    "eslint-fix": "eslint --fix src/**/*.js src/**/*.jsx",
-    "lint": "eslint src/**/*.js src/**/*.jsx",
+    "eslint-fix": "eslint --fix app/**/*.js app/**/*.jsx",
+    "lint": "eslint app/**/*.js app/**/*.jsx",
     "webpack": "webpack"
   },
   "keywords": [],

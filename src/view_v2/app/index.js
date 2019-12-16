@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 import { Route, Link, BrowserRouter as Router, Switch } from 'react-router-dom';
 
 import App from './App';
-import Login from './login/login.jsx';
-import Registration from './registration/registration.jsx';
-import Error404 from './Error404/Error404.jsx';
+import Login from './pages/login/login.jsx';
+import Registration from './pages/registration/registration.jsx';
+import Error404 from './pages/Error404/Error404.jsx';
 
 import './index.less';
 

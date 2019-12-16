@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
 
 class App extends Component {
-    render () {
+
+    render() {
+
         return (
             <div>
                 <h1>StockSim v.2</h1>
             </div>
         );
+
     }
+
 }
 export default App;
