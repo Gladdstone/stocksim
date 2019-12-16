@@ -1,10 +1,14 @@
 {
     "parser": "babel-eslint",
-    "extends": "react",
+    "extends": ["eslint:recommended","react"],
     "env": {
         "browser": true,
         "node": true
     },
+    "rules": {
+        "jsx-quotes": ["warn", "prefer-single"],
+        "quotes": ["warn", "single"]
+    }, 
     "settings": {
         "react": {
             "version": "detect"

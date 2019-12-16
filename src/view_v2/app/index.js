@@ -1,5 +1,5 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { Route, Link, BrowserRouter as Router, Switch } from 'react-router-dom';
 
 import App from './App';
@@ -14,19 +14,19 @@ const routing = (
         <div>
             <ul>
                 <li>
-                    <Link to="/">Home</Link>
+                    <Link to='/'>Home</Link>
                 </li>
                 <li>
-                    <Link to="/login">Login</Link>
+                    <Link to='/login'>Login</Link>
                 </li>
                 <li>
-                    <Link to="/register">Register</Link>
+                    <Link to='/register'>Register</Link>
                 </li>
             </ul>
             <Switch>
-                <Route exact path="/" component={App} />
-                <Route path="/login" component={Login} />
-                <Route path="/register" component={Registration} />
+                <Route exact path='/' component={App} />
+                <Route path='/login' component={Login} />
+                <Route path='/register' component={Registration} />
                 <Route component={Error404} />
             </Switch>
         </div>
