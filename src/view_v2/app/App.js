@@ -8,15 +8,15 @@ export default function App(props) {
 
     return (
         <div className='App container'>
-            <Navbar bg='light' expand='lg'>
+            <Navbar bg='light' expand='lg' className='header_bar'>
                 <Navbar.Brand href='/'>Home</Navbar.Brand>
                 <Navbar.Toggle aria-controls='basic-navbar-nav' />
                 <Navbar.Collapse>
-                    <Nav>
-                        <LinkContainer to='/register'>
+                    <Nav className='navbar'>
+                        <LinkContainer to='/register' className='link'>
                             <NavItem>Signup</NavItem>
                         </LinkContainer>
-                        <LinkContainer to='/login'>
+                        <LinkContainer to='/login' className='link'>
                             <NavItem>Login</NavItem>
                         </LinkContainer>
                     </Nav>
