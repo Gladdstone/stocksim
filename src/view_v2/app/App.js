@@ -27,4 +27,3 @@ export default function App(props) {
     );
 
 }
-// export default App;

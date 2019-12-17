@@ -6,4 +6,8 @@ import App from './App';
 
 import './index.less';
 
-ReactDOM.render(<Router><App /></Router>, document.getElementById('root'));
+ReactDOM.render(
+    <Router>
+        <App />
+    </Router>,
+    document.getElementById('root'));
