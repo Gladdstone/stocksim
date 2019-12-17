@@ -1,16 +1,30 @@
-import React, { Component } from 'react';
+import React from 'react';
+import { Nav, Navbar, NavItem } from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 
-class App extends Component {
+import Routes from './Routes';
 
-    render() {
+export default function App(props) {
 
-        return (
-            <div>
-                <h1>StockSim v.2</h1>
-            </div>
-        );
-
-    }
+    return (
+        <div className='App container'>
+            <Navbar bg='light' expand='lg'>
+                <Navbar.Brand href='/'>Home</Navbar.Brand>
+                <Navbar.Toggle aria-controls='basic-navbar-nav' />
+                <Navbar.Collapse>
+                    <Nav>
+                        <LinkContainer to='/register'>
+                            <NavItem>Signup</NavItem>
+                        </LinkContainer>
+                        <LinkContainer to='/login'>
+                            <NavItem>Login</NavItem>
+                        </LinkContainer>
+                    </Nav>
+                </Navbar.Collapse>
+            </Navbar>
+            <Routes />
+        </div>
+    );
 
 }
-export default App;
+// export default App;
