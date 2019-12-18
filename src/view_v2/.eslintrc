@@ -1,9 +1,17 @@
 {
     "parser": "babel-eslint",
     "extends": ["eslint:recommended","react"],
+    "ecmaFeatures": {
+        "jsx": true,
+        "modules": true,
+        "arrowFunctions": true,
+        "classes": true,
+        "spread": true
+    },
     "env": {
         "browser": true,
-        "node": true
+        "node": true,
+        "es6": true
     },
     "rules": {
         "jsx-quotes": ["warn", "prefer-single"],
