@@ -21,7 +21,7 @@ export default class Registration extends Component {
                         <Form.Control type='password' placeholder='Password' />
                     </Form.Group>
 
-                    <Button bsStyle='default' variant='primary' type='submit'>Submit</Button>
+                    <Button variant='primary' type='submit'>Signup</Button>
                 </Form>
             </div>
         );
