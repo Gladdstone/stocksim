@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Button, Form } from 'react-bootstrap';
+import PropTypes from 'prop-types';
 
 import { userPostRegistration } from '../../modules/actions';
 
@@ -11,7 +12,7 @@ class Registration extends Component {
 
         super(props);
         this.state = {
-            email: '',
+            username: '',
             password: ''
         };
 
@@ -27,6 +28,7 @@ class Registration extends Component {
 
     handleSubmit = event => {
 
+        event.preventDefault();
         this.props.userPostRegistration(this.state);
 
     }
@@ -39,15 +41,17 @@ class Registration extends Component {
                 <Form onSubmit={this.handleSubmit}>
                     <Form.Group controlId='formEmail'>
                         <Form.Label>Email Address</Form.Label>
-                        <Form.Control type='email' placeholder='Enter email' value={this.state.email} onChange={this.handleFormUpdate} />
+                        <Form.Control type='email' placeholder='Enter email' values={this.state.username}
+                            onChange={this.handleFormUpdate} />
                     </Form.Group>
 
                     <Form.Group controlId='formPassword'>
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type='password' placeholder='Password' value={this.state.password} onChange={this.handleFormUpdate} />
+                        <Form.Control type='password' placeholder='Password' values={this.state.password}
+                            onChange={this.handleFormUpdate} />
                     </Form.Group>
 
-                    <Button variant='primary' type='submit'>Signup</Button>
+                    <Button variant='primary' type='submit'>Submit</Button>
                 </Form>
             </div>
         );
@@ -55,6 +59,11 @@ class Registration extends Component {
     }
 
 }
+
+Registration.propTypes = {
+    username: PropTypes.string,
+    userPostRegistration: PropTypes.func
+};
 
 const mapDispatchToProps = dispatch => ({
     userPostRegistration: userInfo => dispatch(userPostRegistration(userInfo))
