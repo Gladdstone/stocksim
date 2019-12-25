@@ -13,22 +13,6 @@ from api import UserService, StockService
 from controllers.UserController import UserController
 from settings import JWT_SECRET_KEY
 
-# api urls
-LOCAL_URL = 'http://localhost:5000'
-API_LOGIN = '/login/submit'
-API_REGISTER = '/registration'
-API_WATCHLIST_ADD = "/watch/add"
-API_WATCHLIST_REMOVE = "/watch/remove"
-API_REFRESH = "/token/refresh"
-API_LOGOUT = "/logout/access"
-API_LOGOUT_REFRESH = "/logout/refresh"
-API_STOCK_PURCHASE_SELL = "/stock/purchase"
-API_STOCK = "/stock"
-API_USER_INFO = "/user/info"
-ACCESS_COOKIE = 'user_access'
-REFRESH_COOKIE = 'user_refresh'
-USER_COOKIE = 'user_info'
-
 app = Flask(__name__)
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
@@ -50,6 +34,21 @@ def check_if_token_in_blacklist(decrypted_token):
     jti = decrypted_token["jti"]
     return UserController.tokenIsBlacklisted(jti)
 
+# api urls
+LOCAL_URL = 'http://localhost:5000'
+API_LOGIN = '/login/submit'
+API_REGISTER = '/registration'
+API_WATCHLIST_ADD = "/watch/add"
+API_WATCHLIST_REMOVE = "/watch/remove"
+API_REFRESH = "/token/refresh"
+API_LOGOUT = "/logout/access"
+API_LOGOUT_REFRESH = "/logout/refresh"
+API_STOCK_PURCHASE_SELL = "/stock/purchase"
+API_STOCK = "/stock"
+API_USER_INFO = "/user/info"
+ACCESS_COOKIE = 'user_access'
+REFRESH_COOKIE = 'user_refresh'
+USER_COOKIE = 'user_info'
 
 # User Service
 api.add_resource(UserService.UserRegistration, API_REGISTER)
