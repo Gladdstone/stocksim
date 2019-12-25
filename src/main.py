@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os, requests, json, ast
 from flask import Flask, render_template, redirect, url_for, request, make_response
+from flask_cors import CORS
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 from guppy import hpy
@@ -32,6 +33,7 @@ REFRESH_COOKIE = 'user_refresh'
 USER_COOKIE = 'user_info'
 
 app = Flask(__name__, template_folder=TEMPLATE_FOLDER, static_folder=STATIC_FOLDER)
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
 app.config["JWT_BLACKLIST_ENABLED"] = True

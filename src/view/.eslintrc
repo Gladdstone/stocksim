@@ -1,0 +1,20 @@
+{
+    "parser": "babel-eslint",
+    "extends": ["eslint:recommended","react"],
+    "env": {
+        "browser": true,
+        "node": true,
+        "es6": true
+    },
+    "rules": {
+        "jsx-quotes": ["warn", "prefer-single"],
+        "padded-blocks": ["warn", "always"],
+        "space-before-function-paren": ["warn", "never"],
+        "quotes": ["warn", "single"]
+    }, 
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
+}
