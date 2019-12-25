@@ -1,3 +1,5 @@
+import serviceApi from '../api/serviceApi';
+
 const loginUser = user => ({
     type: 'LOGIN_USER',
     payload: user
@@ -7,31 +9,21 @@ export const userPostRegistration = user => {
 
     return dispatch => {
 
-        return fetch('http://localhost:5000/registration', { // TODO - convert to env variable
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: JSON.stringify({ user })
-        })
-            .then(resp => resp.json())
-            .then(data => {
+        return serviceApi.register(user).then(data => {
 
-                if (data.message) {
+            if (!data.error) {
 
-                    console.log(data.message);
+                console.log(data.error);
 
-                } else {
+            } else {
 
-                    console.log('response received');
-                    localStorage.setItem('token', data.jwt);
-                    dispatch(loginUser(data.user));
+                console.log('response received');
+                localStorage.setItem('token', data.access_token);
+                dispatch(loginUser(data.user));
 
-                }
+            }
 
-            });
+        });
 
     };
 
@@ -41,27 +33,20 @@ export const userPostLogin = user => {
 
     return dispatch => {
 
-        return fetch('http://localhost:5000/registration', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ user })
-        })
-            .then(resp => resp.json())
-            .then(data => {
+        return serviceApi.login(user).then(data => {
 
-                if (data.message) {
-                    // TODO - handle login error
-                } else {
+            if (!data.error) {
 
-                    localStorage.setItem('token', data.jwt);
-                    dispatch(loginUser(data.user));
+                console.log(data.error);
 
-                }
+            } else {
 
-            });
+                localStorage.setItem('token', data.access_token);
+                dispatch(loginUser(data.user));
+
+            }
+
+        });
 
     };
 
