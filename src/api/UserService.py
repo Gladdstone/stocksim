@@ -1,4 +1,4 @@
-from flask_restful import Resource, reqparse
+from flask_restful import Resource, reqparse, request
 from flask_jwt_extended import (create_access_token, create_refresh_token, jwt_required, jwt_refresh_token_required, get_jwt_identity, get_raw_jwt)
 import json
 
@@ -13,25 +13,30 @@ parser.add_argument("email", help="This field can be blank", required=False)
 
 class UserRegistration(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = request.get_json()["credentials"]
+        email = data["email"]
+        password = data["password"]
+        
         userController = UserController()
 
-        if(userController.findByUsername(data["username"]) != None):
-            return {"message": f"User {data['username']} already exists"}
+        # validate that user email doesn't already exist
+        if(userController.findByEmail(email) != None):
+            return {"error": f"User {email} already exists"}
 
         try:
-            userController.registration(data["username"], data["password"]) #, data["email"])
-            access_token = create_access_token(identity = data["username"])
-            refresh_token = create_refresh_token(identity = data["username"])
+            message = userController.registration(email, password)
+            access_token = create_access_token(identity = email)
+            refresh_token = create_refresh_token(identity = email)
 
             return {
-                "message": "User successfully created",
+                "message": message,
+                "user": email,
                 "access_token": access_token,
                 "refresh_token": refresh_token
             }
 
         except:
-            return {"message": "Something went wrong"}
+            return {"error": "Something went wrong"}
 
 class UserLogin(Resource):
     def post(self):

@@ -9,14 +9,14 @@ from settings import HOST, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 class UserController:
 
     @staticmethod
-    def findByUsername(username: str): # -> User:
+    def findByEmail(email: str) -> User:
         connection = None
         user = None
         try:
             connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
             cursor = connection.cursor()
 
-            cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';")
+            cursor.execute(f"SELECT * FROM UserTable WHERE email='{email}';")
             row = cursor.fetchone()
 
             if(row is None):
@@ -113,42 +113,28 @@ class UserController:
 
     # Adds a new User to the database
     @staticmethod
-    def registration(username: str, password: str): #, email: str):
+    def registration(email: str, password: str):
         connection = None
         try:
             connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
 
             if connection.is_connected():
                 cursor = connection.cursor()
-                cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';") # TODO
-                row = cursor.fetchone()
-                print(row)
-                if(row is not None):
-                    return {"Error": "Unable to create new user: Duplicate username"}   # TODO
 
                 hashedPassword, salt = hash(password)
 
-                cursor.execute(f"INSERT INTO UserTable(username) VALUES('{username}');")
-                cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE username='{username}'), '{hashedPassword}', '{salt}');")
-
-                # verify
-                cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';") # TODO
-                row = cursor.fetchone()
-                print("registration pt2")
-                print(row)
-
-                if(row is None):
-                    return {"Error": "Something went wrong, please try again."}
-
-                connection.commit()
+                cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
+                cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), '{hashedPassword}', '{salt}');")
+                
                 cursor.close()
+                connection.commit()
         except psycopg.DatabaseError as error:
-            print(error)
-            return {"message": "Unable to create new user"}   # TODO
+            return error
         finally:
             if(connection is not None):
                 connection.close()
-            return {"message": "Registration successful"}   # TODO
+
+            return "User successfully created"
 
     # Marks existing user as archived
     @staticmethod

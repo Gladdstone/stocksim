@@ -11,6 +11,8 @@ export const userPostRegistration = user => {
 
         return serviceApi.register(user).then(data => {
 
+            console.log(user);
+
             if (!data.error) {
 
                 console.log(data.error);

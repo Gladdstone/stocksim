@@ -12,7 +12,7 @@ class Registration extends Component {
 
         super(props);
         this.state = {
-            username: '',
+            email: '',
             password: ''
         };
 
@@ -20,6 +20,9 @@ class Registration extends Component {
 
     handleFormUpdate = event => {
 
+        // pull SyntheticEvent out of the pool, causing a new event to be added
+        // to be reused with later DOM events
+        event.persist();
         this.setState({
             [event.target.name]: event.target.value
         });
@@ -41,14 +44,14 @@ class Registration extends Component {
                 <Form onSubmit={this.handleSubmit}>
                     <Form.Group controlId='formEmail'>
                         <Form.Label>Email Address</Form.Label>
-                        <Form.Control type='email' placeholder='Enter email' values={this.state.username}
+                        <Form.Control type='email' placeholder='Enter email' name='email' values={this.state.email}
                             onChange={this.handleFormUpdate} />
                     </Form.Group>
 
                     <Form.Group controlId='formPassword'>
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type='password' placeholder='Password' values={this.state.password}
-                            onChange={this.handleFormUpdate} />
+                        <Form.Control type='password' placeholder='Password' name='password'
+                            values={this.state.password} onChange={this.handleFormUpdate} />
                     </Form.Group>
 
                     <Button variant='primary' type='submit'>Submit</Button>
@@ -61,7 +64,8 @@ class Registration extends Component {
 }
 
 Registration.propTypes = {
-    username: PropTypes.string,
+    email: PropTypes.string.isRequired,
+    password: PropTypes.string.isRequired,
     userPostRegistration: PropTypes.func
 };
 
