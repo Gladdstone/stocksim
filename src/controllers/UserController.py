@@ -8,6 +8,14 @@ from settings import HOST, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
 
+    conn_config = {
+        'host': HOST,
+        'dbname': PSQL_DATABASE,
+        'user': PSQL_USER,
+        'password': PSQL_PASSWORD,
+        'port': 5432
+    }
+
     @staticmethod
     def findByEmail(email: str) -> User:
         connection = None
@@ -112,23 +120,23 @@ class UserController:
 
 
     # Adds a new User to the database
-    @staticmethod
-    def registration(email: str, password: str):
+    @classmethod
+    def registration(cls, email: str, password: str):
         connection = None
         try:
-            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
+            connection = psycopg.connect(**cls.conn_config)
 
-            if connection.is_connected():
-                cursor = connection.cursor()
+            cursor = connection.cursor()
 
-                hashedPassword, salt = hash(password)
+            hashedPassword, salt = hash(password)
 
-                cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
-                cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), '{hashedPassword}', '{salt}');")
-                
-                cursor.close()
-                connection.commit()
-        except psycopg.DatabaseError as error:
+            cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
+            cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), '{hashedPassword}', '{salt}');")
+            
+            connection.commit()
+            cursor.close()
+        except Exception as error:
+            connection.rollback()
             return error
         finally:
             if(connection is not None):
