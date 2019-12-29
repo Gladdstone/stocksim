@@ -28,15 +28,18 @@ class UserRegistration(Resource):
             access_token = create_access_token(identity = email)
             refresh_token = create_refresh_token(identity = email)
 
-            return {
-                "message": message,
-                "user": email,
-                "access_token": access_token,
-                "refresh_token": refresh_token
-            }
+            if(message != "") :
+                return {
+                    "message": message,
+                    "user": email,
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                }
 
         except:
             return {"error": "Something went wrong"}
+
+        return {"error": "Something went wrong"}
 
 class UserLogin(Resource):
     def post(self):

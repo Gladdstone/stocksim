@@ -8,13 +8,7 @@ from settings import HOST, PORT, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
 
-    conn_config = {
-        'host': HOST,
-        'dbname': PSQL_DATABASE,
-        'user': PSQL_USER,
-        'password': PSQL_PASSWORD,
-        'port': PORT
-    }
+    conn_config = (f"host={HOST} port={PORT} dbname={PSQL_DATABASE} user={PSQL_USER} password={PSQL_PASSWORD}")
 
     @staticmethod
     def findByEmail(email: str) -> User:
@@ -124,7 +118,7 @@ class UserController:
     def registration(cls, email: str, password: str) -> str:
         connection = None
         try:
-            connection = psycopg.connect(host=HOST, port=PORT, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
+            connection = psycopg.connect(cls.conn_config)
 
             print(f"REGISTRATION: connection established at: {HOST}:{PORT}")
 
@@ -141,16 +135,16 @@ class UserController:
             connection.rollback()
             print(f"REGISTRATION: unable to establish connection at: {HOST}:{PORT}")
             print(traceback.format_exc())
-            return "Unable to establish connection"     # TODO - raise a custom exception
+            raise ConnectionError
         except psycopg.Error as error:
             connection.rollback()
             print(f"REGISTRATION: {error.pgcode} - {error.pgerror}")
             raise
-        except:
+        except Exception as error:
             connection.rollback()
             print(f"REGISTRATION: unknown failure")
             print(traceback.format_exc())
-            return "Unable to complete registration"    # TODO - raise a custom exception
+            raise
 
         if(connection is not None):
             connection.close()
