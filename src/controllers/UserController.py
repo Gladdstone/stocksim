@@ -1,10 +1,10 @@
 # dependencies
-import binascii, hashlib, os
+import binascii, hashlib, os, traceback
 import psycopg2 as psycopg
 
 # LOCAL
 from models import User
-from settings import HOST, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
+from settings import HOST, PORT, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
 
@@ -13,7 +13,7 @@ class UserController:
         'dbname': PSQL_DATABASE,
         'user': PSQL_USER,
         'password': PSQL_PASSWORD,
-        'port': 5432
+        'port': PORT
     }
 
     @staticmethod
@@ -121,28 +121,42 @@ class UserController:
 
     # Adds a new User to the database
     @classmethod
-    def registration(cls, email: str, password: str):
+    def registration(cls, email: str, password: str) -> str:
         connection = None
         try:
-            connection = psycopg.connect(**cls.conn_config)
+            connection = psycopg.connect(host=HOST, port=PORT, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
+
+            print(f"REGISTRATION: connection established at: {HOST}:{PORT}")
 
             cursor = connection.cursor()
 
-            hashedPassword, salt = hash(password)
+            salt, password_hash = cls.__hash(password)
 
             cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
-            cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), '{hashedPassword}', '{salt}');")
+            cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), {psycopg.Binary(password_hash)}, {psycopg.Binary(salt)});")
             
             connection.commit()
             cursor.close()
-        except Exception as error:
+        except psycopg.OperationalError as error:
             connection.rollback()
-            return error
-        finally:
-            if(connection is not None):
-                connection.close()
+            print(f"REGISTRATION: unable to establish connection at: {HOST}:{PORT}")
+            print(traceback.format_exc())
+            return "Unable to establish connection"     # TODO - raise a custom exception
+        except psycopg.Error as error:
+            connection.rollback()
+            print(f"REGISTRATION: {error.pgcode} - {error.pgerror}")
+            raise
+        except:
+            connection.rollback()
+            print(f"REGISTRATION: unknown failure")
+            print(traceback.format_exc())
+            return "Unable to complete registration"    # TODO - raise a custom exception
 
+        if(connection is not None):
+            connection.close()
             return "User successfully created"
+
+        return ""
 
     # Marks existing user as archived
     @staticmethod
@@ -174,11 +188,16 @@ class UserController:
             return {"message": "User successfully archived"}    # TODO
 
     # secure password with sha512
-    def __hash(self, password: str):
+    @classmethod
+    def __hash(cls, password: str) -> (bytes, bytes):
         salt = hashlib.sha512(os.urandom(60)).hexdigest().encode("ascii")
-        hashedValue = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 10000)
+        password_hash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
 
-        return (salt + binascii.hexlify(hashedValue)), salt
+        return cls.__hex_encode(salt), cls.__hex_encode(password_hash)
+
+    @staticmethod
+    def __hex_encode(value: str) -> bytes:
+        return "0x".encode("ascii") + binascii.hexlify(value)
 
     @staticmethod
     def login(username: str, password: str):
