@@ -12,7 +12,11 @@ class UserController:
     conn_config = (f"host={HOST} port={PORT} dbname={PSQL_DATABASE} user={PSQL_USER} password={PSQL_PASSWORD}")
 
     @classmethod
-    def findByEmail(cls, email: str) -> User:
+    def find_by_email(cls, email: str) -> User:
+        """Find user by email column
+        Returns user object from table, if valid. None otherwise.
+        """
+
         connection = None
         user = None
         try:
@@ -199,11 +203,12 @@ class UserController:
                 connection.close()
             return {"message": "User successfully archived"}    # TODO
 
-    """Logs in user
-    Calls hash validation function and creates a new authenticated user object on success
-    """
     @classmethod
     def login(cls, email: str, password: str) -> bool:
+        """Logs in user
+        Calls hash validation function and creates a new authenticated user object on success
+        """
+        
         connection = None
         try:
             connection = psycopg.connect(cls.conn_config)
