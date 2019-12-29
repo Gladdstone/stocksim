@@ -14,8 +14,8 @@ DROP TABLE IF EXISTS LoginData;
 CREATE TABLE LoginData(
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL REFERENCES UserTable(id),
-    password VARCHAR(20) NOT NULL,
-    salt VARCHAR(64) NOT NULL
+    password BYTEA NOT NULL,
+    salt BYTEA NOT NULL
 );
 
 DROP TABLE IF EXISTS UserBalanceHistory;
