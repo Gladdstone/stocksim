@@ -43,19 +43,22 @@ class UserRegistration(Resource):
 
 class UserLogin(Resource):
     def post(self):
-        data = parser.parse_args()
+        data = request.get_json()
+        email = data["email"]
+        password = data["password"]
+
         userController = UserController()
 
         try:
-            if (userController.findByUsername(data["username"])) == None:
-                return {"message": f"User {data.username} doesn't exist"}
+            if (userController.findByEmail(email)) == None:
+                return {"message": f"User {email} doesn't exist"}
 
-            if userController.login(data["username"], data["password"]) == True:
-                access_token = create_access_token(identity = data["username"])
-                refresh_token = create_refresh_token(identity = data["username"])
+            if userController.login(email, password) == True:
+                access_token = create_access_token(identity = email)
+                refresh_token = create_refresh_token(identity = email)
 
                 return {
-                    "message": f"Logged in as {data['username']}",
+                    "message": f"Logged in as {email}",
                     "access_token": access_token,
                     "refresh_token": refresh_token
                 }

@@ -1,9 +1,10 @@
 # dependencies
-import binascii, hashlib, os, traceback
+import traceback
 import psycopg2 as psycopg
 
 # LOCAL
-from models import User
+from models.User import User
+from api.validation_service import ValidationService
 from settings import ENV, HOST, PORT, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
@@ -24,21 +25,30 @@ class UserController:
             if(row is None):
                 return None
 
-            user = User.User(row[0], row[1])
+            user = User(row[0], row[1])
 
             cursor.close()
         except psycopg.OperationalError as error:
             if(ENV == "development"):
-                print(f"FINDBYEMAIL: unable to establish connection at: {HOST}:{PORT}")
+                print(f"FIND_BY_EMAIL: unable to establish connection at: {HOST}:{PORT}")
                 print(traceback.format_exc())
             raise ConnectionError
-        except psycopg.DatabaseError as error:
-            print(error)
+        except psycopg.Error as error:
+            connection.rollback()
+            if(ENV == "development"):
+                print(f"FIND_BY_EMAIL: {error.pgcode} - {error.pgerror}")
             raise
-        finally:
-            if(connection is not None):
-                connection.close()
-            return user
+        except Exception as error:
+            connection.rollback()
+            if(ENV == "development"):
+                print(f"FIND_BY_EMAIL: unknown failure")
+                print(traceback.format_exc())
+            raise
+
+        if(connection is not None):
+            connection.close()
+        
+        return user
 
     # Add balance to user account
     @staticmethod
@@ -127,8 +137,9 @@ class UserController:
             print(f"REGISTRATION: connection established at: {HOST}:{PORT}")
 
             cursor = connection.cursor()
+            vs = ValidationService()
 
-            salt, password_hash = cls.__hash(password)
+            salt, password_hash = vs.__hash(password)
 
             cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
             cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), {psycopg.Binary(password_hash)}, {psycopg.Binary(salt)});")
@@ -176,7 +187,7 @@ class UserController:
             if(row is not None):
                 return {"Error": "Unable to archive user: does note exist"} #TODO
 
-            cursor.execute(f"UPDATE UserData SET archived=TRUE WHERE id={userID};")
+            cursor.execute(f"UPDATE UserData SET archived=TRUE WHERE id={user_id};")
 
             connection.commit()
             cursor.close()
@@ -188,78 +199,57 @@ class UserController:
                 connection.close()
             return {"message": "User successfully archived"}    # TODO
 
-    # secure password with sha512
+    """Logs in user
+    Calls hash validation function and creates a new authenticated user object on success
+    """
     @classmethod
-    def __hash(cls, password: str) -> (bytes, bytes):
-        salt = hashlib.sha512(os.urandom(60)).hexdigest().encode("ascii")
-        password_hash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
-
-        return cls.__hex_encode(salt), cls.__hex_encode(password_hash)
-
-    @staticmethod
-    def __hex_encode(value: str) -> bytes:
-        return "0x".encode("ascii") + binascii.hexlify(value)
-
-    @classmethod
-    def login(cls, username: str, password: str):
+    def login(cls, email: str, password: str) -> bool:
         connection = None
         try:
             connection = psycopg.connect(cls.conn_config)
 
-            if connection.is_connected():
-                cursor = connection.cursor()
+            cursor = connection.cursor()
 
-                cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';")
-                row = cursor.fetchone()
+            cursor.execute(f"SELECT * FROM UserTable WHERE email='{email}';")
+            row = cursor.fetchone()
 
-                if(row is None):
-                    return False
+            if(row is None):
+                return False
 
-                # validate the password with salt
-                cursor.execute(f"SELECT password, salt FROM LoginData WHERE user_id = {row[0]};")
-                row = cursor.fetchone()
-                dbPassword = row[0]
-                salt = row[1]
+            # validate the password with salt
+            cursor.execute(f"SELECT password, salt FROM LoginData WHERE user_id={row[0]};")
+            row = cursor.fetchone()
+            dbPassword = row[0]
+            salt = row[1]
 
-                cursor.close()
-                if(password == salt + dbPassword):
-                    user = User.User(row[0], username)
-                    user.authenticate()
-                    return True
+            cursor.close()
 
-            return False
-        except psycopg.DatabaseError as error:
-            print(error)
-            return False
+            vs = ValidationService()
 
-    # separate function
-    @staticmethod
-    def validate_login(user: User, user_id: str, password: str):
-        connection = None
-        try:
-            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
-            if connection.is_connected():
-                cursor = connection.cursor()
+            if(vs.__validate_hash(password, dbPassword, salt)):
+                user = User(row[0], email)
+                user.authenticate()
+                return True
+            
+        except psycopg.OperationalError as error:
+            connection.rollback()
+            if(ENV == "development"):
+                print(f"LOGIN: unable to establish connection at: {HOST}:{PORT}")
+                print(traceback.format_exc())
+            raise ConnectionError
+        except psycopg.Error as error:
+            connection.rollback()
+            if(ENV == "development"):
+                print(f"LOGIN: {error.pgcode} - {error.pgerror}")
+            raise
+        except Exception as error:
+            connection.rollback()
+            if(ENV == "development"):
+                print(f"LOGIN: unknown failure")
+                print(traceback.format_exc())
+            raise
 
-                # get the salt and password
-                cursor.execute(f"SELECT password, salt FROM LoginData WHERE user_id = {user_id}")
-                row = cursor.fetchone()
-
-                dbPassword = row[0]
-                salt = row[1]
-
-                hashedPassword, salt = hash(password)
-                hashedPassword = salt + hashedPassword
-
-                if(hashedPassword == salt + dbPassword):
-                    user.authenticate()
-                    return True
-
-            return False
-        except psycopg.DatabaseError as error:
-            print(error)
-            return False
-
+        return False
 
     @staticmethod
     def logout(user: User, tokenId: str):

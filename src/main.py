@@ -36,7 +36,7 @@ def check_if_token_in_blacklist(decrypted_token):
 
 # api urls
 LOCAL_URL = 'http://localhost:5000'
-API_LOGIN = '/login/submit'
+API_LOGIN = '/login'
 API_REGISTER = '/registration'
 API_WATCHLIST_ADD = "/watch/add"
 API_WATCHLIST_REMOVE = "/watch/remove"

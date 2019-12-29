@@ -1,19 +1,19 @@
 class User:
 
-    def __init__(self, user_id: int, username: str):
+    def __init__(self, user_id: int, email: str):
         self.user_id = user_id
-        self.username = username
-        self.isAuthenticated = False
+        self.email = email
+        self.is_authenticated = False
 
-    def getUsername(self):
-        return self.username
+    def get_email(self):
+        return self.email
 
-    def getUserId(self):
+    def get_user_id(self):
         return self.user_id
 
-    def isAuthenticated(self):
-        return self.isAuthenticated
+    def is_authenticated(self):
+        return self.is_authenticated
 
     # There's no way this is the correct way to do this
     def authenticate(self):
-        self.isAuthenticated = True
+        self.is_authenticated = True
