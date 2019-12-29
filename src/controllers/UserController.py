@@ -143,7 +143,7 @@ class UserController:
             cursor = connection.cursor()
             vs = ValidationService()
 
-            salt, password_hash = vs.__hash(password)
+            salt, password_hash = vs.hash(password)
 
             cursor.execute(f"INSERT INTO UserTable(email) VALUES('{email}');")
             cursor.execute(f"INSERT INTO LoginData(user_id, password, salt) VALUES((SELECT id FROM UserTable WHERE email='{email}'), {psycopg.Binary(password_hash)}, {psycopg.Binary(salt)});")
@@ -208,7 +208,7 @@ class UserController:
         """Logs in user
         Calls hash validation function and creates a new authenticated user object on success
         """
-        
+
         connection = None
         try:
             connection = psycopg.connect(cls.conn_config)
@@ -224,14 +224,14 @@ class UserController:
             # validate the password with salt
             cursor.execute(f"SELECT password, salt FROM LoginData WHERE user_id={row[0]};")
             row = cursor.fetchone()
-            dbPassword = row[0]
-            salt = row[1]
+            dbPassword = row[0].tobytes()
+            salt = row[1].tobytes()
 
             cursor.close()
 
             vs = ValidationService()
 
-            if(vs.__validate_hash(password, dbPassword, salt)):
+            if(vs.validate_hash(password, dbPassword, salt)):
                 user = User(row[0], email)
                 user.authenticate()
                 return True
