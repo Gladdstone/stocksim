@@ -4,18 +4,18 @@ import psycopg2 as psycopg
 
 # LOCAL
 from models import User
-from settings import HOST, PORT, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
+from settings import ENV, HOST, PORT, PSQL_DATABASE, PSQL_USER, PSQL_PASSWORD
 
 class UserController:
 
     conn_config = (f"host={HOST} port={PORT} dbname={PSQL_DATABASE} user={PSQL_USER} password={PSQL_PASSWORD}")
 
-    @staticmethod
-    def findByEmail(email: str) -> User:
+    @classmethod
+    def findByEmail(cls, email: str) -> User:
         connection = None
         user = None
         try:
-            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
+            connection = psycopg.connect(cls.conn_config)
             cursor = connection.cursor()
 
             cursor.execute(f"SELECT * FROM UserTable WHERE email='{email}';")
@@ -27,10 +27,14 @@ class UserController:
             user = User.User(row[0], row[1])
 
             cursor.close()
-
+        except psycopg.OperationalError as error:
+            if(ENV == "development"):
+                print(f"FINDBYEMAIL: unable to establish connection at: {HOST}:{PORT}")
+                print(traceback.format_exc())
+            raise ConnectionError
         except psycopg.DatabaseError as error:
             print(error)
-            return None
+            raise
         finally:
             if(connection is not None):
                 connection.close()
@@ -133,17 +137,20 @@ class UserController:
             cursor.close()
         except psycopg.OperationalError as error:
             connection.rollback()
-            print(f"REGISTRATION: unable to establish connection at: {HOST}:{PORT}")
-            print(traceback.format_exc())
+            if(ENV == "development"):
+                print(f"REGISTRATION: unable to establish connection at: {HOST}:{PORT}")
+                print(traceback.format_exc())
             raise ConnectionError
         except psycopg.Error as error:
             connection.rollback()
-            print(f"REGISTRATION: {error.pgcode} - {error.pgerror}")
+            if(ENV == "development"):
+                print(f"REGISTRATION: {error.pgcode} - {error.pgerror}")
             raise
         except Exception as error:
             connection.rollback()
-            print(f"REGISTRATION: unknown failure")
-            print(traceback.format_exc())
+            if(ENV == "development"):
+                print(f"REGISTRATION: unknown failure")
+                print(traceback.format_exc())
             raise
 
         if(connection is not None):
@@ -193,16 +200,16 @@ class UserController:
     def __hex_encode(value: str) -> bytes:
         return "0x".encode("ascii") + binascii.hexlify(value)
 
-    @staticmethod
-    def login(username: str, password: str):
+    @classmethod
+    def login(cls, username: str, password: str):
         connection = None
         try:
-            connection = psycopg.connect(host=HOST, database=PSQL_DATABASE, user=PSQL_USER, password=PSQL_PASSWORD)
+            connection = psycopg.connect(cls.conn_config)
 
             if connection.is_connected():
                 cursor = connection.cursor()
 
-                cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';")  ### Missing an f before query??
+                cursor.execute(f"SELECT * FROM UserTable WHERE username='{username}';")
                 row = cursor.fetchone()
 
                 if(row is None):
