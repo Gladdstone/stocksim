@@ -20,7 +20,7 @@ class UserRegistration(Resource):
         userController = UserController()
 
         # validate that user email doesn't already exist
-        if(userController.findByEmail(email) != None):
+        if(userController.find_by_email(email) != None):
             return {"error": f"User {email} already exists"}
 
         try:
@@ -50,7 +50,7 @@ class UserLogin(Resource):
         userController = UserController()
 
         try:
-            if (userController.findByEmail(email)) == None:
+            if (userController.find_by_email(email)) == None:
                 return {"message": f"User {email} doesn't exist"}
 
             if userController.login(email, password) == True:
