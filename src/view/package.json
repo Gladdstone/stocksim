@@ -16,7 +16,7 @@
   "dependencies": {
     "bootstrap": "^4.4.1",
     "css-loader": "^3.3.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
     "path": "^0.12.7",
