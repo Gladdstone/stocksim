@@ -1,5 +1,5 @@
 flask==1.1.1
-flask_cors==3.0.8
+flask_cors==3.0.9
 flask_restful==0.3.7
 flask_jwt_extended==3.24.1
 requests==2.20.0
